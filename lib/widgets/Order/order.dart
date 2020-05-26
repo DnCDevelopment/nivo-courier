@@ -19,21 +19,29 @@ class Order extends StatelessWidget {
   Future<int> _getPrice(List<dynamic> dishes) async {
     int total = 0;
     for (int i = 0; i < dishes.length; i++) {
-      final dish = await dishes[i].get();
-      final price =
-          int.parse(dish['price'].substring(0, dish['price'].length - 5));
-      total += price;
+      try {
+        final dish = await dishes[i].get();
+        final price =
+            int.parse(dish['price'].substring(0, dish['price'].length - 5));
+        total += price;
+      } catch (err) {
+        print(err);
+      }
     }
     return total;
   }
 
   void _handleUpdate(String status) async {
     final _status = STATUS.indexOf(status);
-    final _user = await auth.getCurrentUser();
-    _db.collection('orders').document(_id).updateData({
-      "status": STATUS[_status + 1],
-      "courier": _user.uid,
-    });
+    try {
+      final _user = await auth.getCurrentUser();
+      _db.collection('orders').document(_id).updateData({
+        "status": STATUS[_status + 1],
+        "courier": _user.uid,
+      });
+    } catch (err) {
+      print(err);
+    }
   }
 
   Widget _getDishes(BuildContext context, List<dynamic> dishes) {

@@ -57,11 +57,16 @@ class Orders extends StatelessWidget {
   }
 
   Future<Stream<QuerySnapshot>> _hasOrder() {
-    return auth.getCurrentUser().then((user) => _db
-        .collection('orders')
-        .where("status", whereIn: ['food prepare', 'deliver'])
-        .where("courier", isEqualTo: user.uid)
-        .snapshots());
+    return auth
+        .getCurrentUser()
+        .then((user) => _db
+            .collection('orders')
+            .where("status", whereIn: ['food prepare', 'deliver'])
+            .where("courier", isEqualTo: user.uid)
+            .snapshots())
+        .catchError((e) {
+      print(e);
+    });
   }
 
   @override

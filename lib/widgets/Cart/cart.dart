@@ -46,22 +46,26 @@ class CartState extends State<Cart> {
           .updateData(
               {"position": GeoPoint(position.latitude, position.longitude)});
       GoogleMapController controller = await _controller.future;
-      final icon = await BitmapDescriptor.fromAssetImage(
-          ImageConfiguration(size: Size(24, 24)), 'assets/marker.png');
-      final Marker marker = Marker(
-        markerId: MarkerId("courier"),
-        icon: icon,
-        position: LatLng(
-          position.latitude,
-          position.longitude,
-        ),
-        onTap: () {},
-      );
-      setState(() {
-        _markers["courier"] = marker;
-      });
-      controller.animateCamera(CameraUpdate.newLatLngZoom(
-          LatLng(position.latitude, position.longitude), 18));
+      try {
+        final icon = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(24, 24)), 'assets/marker.png');
+        final Marker marker = Marker(
+          markerId: MarkerId("courier"),
+          icon: icon,
+          position: LatLng(
+            position.latitude,
+            position.longitude,
+          ),
+          onTap: () {},
+        );
+        setState(() {
+          _markers["courier"] = marker;
+        });
+        controller.animateCamera(CameraUpdate.newLatLngZoom(
+            LatLng(position.latitude, position.longitude), 18));
+      } catch (err) {
+        print(err);
+      }
     }).catchError((e) {
       print(e);
     });

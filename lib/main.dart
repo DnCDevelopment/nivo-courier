@@ -19,12 +19,16 @@ class Auth {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final Auth _auth = Auth();
-  final bool isLogged = await _auth.isLogged();
-  final MyApp myApp = MyApp(
-    initialRoute: isLogged ? '/orders' : '/',
-  );
-  runApp(myApp);
+  try {
+    final Auth _auth = Auth();
+    final bool isLogged = await _auth.isLogged();
+    final MyApp myApp = MyApp(
+      initialRoute: isLogged ? '/orders' : '/',
+    );
+    runApp(myApp);
+  } catch (err) {
+    print(err);
+  }
 }
 
 class MyApp extends StatelessWidget {
