@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:nivocourier/models/auth.dart';
 
 class Cart extends StatefulWidget {
   @override
@@ -12,22 +15,37 @@ class Cart extends StatefulWidget {
 
 class CartState extends State<Cart> {
   final Map<String, Marker> _markers = {};
-
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   final _db = Firestore.instance;
-  Timer timer;
+  final BaseAuth _auth = Auth();
+
+  Timer _timer;
+  String _uid;
 
   @override
   void initState() {
     super.initState();
-    timer = Timer.periodic(
+    _timer = Timer.periodic(
         Duration(seconds: 10), (Timer t) => _getCurrentLocation());
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getUser();
+  }
+
+  @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _getUser() async {
+    FirebaseUser user = await _auth.getCurrentUser();
+    setState(() {
+      _uid = user.uid;
+    });
   }
 
   Completer<GoogleMapController> _controller = Completer();
@@ -40,11 +58,8 @@ class CartState extends State<Cart> {
     geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((Position position) async {
-      _db
-          .collection('couriers')
-          .document('QiaUhKLiCDdLKdzzretQPbgVlmf1')
-          .updateData(
-              {"position": GeoPoint(position.latitude, position.longitude)});
+      _db.collection('couriers').document(_uid).updateData(
+          {"position": GeoPoint(position.latitude, position.longitude)});
       GoogleMapController controller = await _controller.future;
       try {
         final icon = await BitmapDescriptor.fromAssetImage(
@@ -75,10 +90,7 @@ class CartState extends State<Cart> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: StreamBuilder<DocumentSnapshot>(
-      stream: _db
-          .collection('couriers')
-          .document('2w12Es2ZUocZ7XOF0nzg')
-          .snapshots(),
+      stream: _db.collection('couriers').document(_uid).snapshots(),
       builder: (context, snapshot) {
         return GoogleMap(
           onMapCreated: _onMapCreated,

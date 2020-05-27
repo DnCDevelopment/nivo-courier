@@ -25,7 +25,7 @@ class Orders extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          '№' + order['number'],
+                          '№' + order['number'].substring(0, 9),
                           style: TextStyle(
                             fontSize: 24,
                           ),
